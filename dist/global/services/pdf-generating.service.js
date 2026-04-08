@@ -25,11 +25,15 @@ let PdfService = class PdfService {
                 const enhancedCSS = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    @page {
-      size: A4;
-      margin: 20mm 15mm;
-    }
+      @page {
+        size: A4;
+        margin: 20mm 5mm;
+      }
 
+      @page :first {
+        margin: 10mm 5mm;
+      }
+        
     * {
       box-sizing: border-box;
       -webkit-print-color-adjust: exact;
@@ -41,6 +45,10 @@ let PdfService = class PdfService {
       color: #1a1a1a;
       margin: 0;
       padding: 0;
+    }
+
+    body > *:first-child {
+      margin-top: 0;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -113,16 +121,33 @@ let PdfService = class PdfService {
                 });
                 await page.addStyleTag({ content: enhancedCSS });
                 await page.evaluateHandle("document.fonts.ready");
+                await page.evaluate(() => {
+                    let el = document.body.firstElementChild;
+                    while (el) {
+                        const isEmptyText = el.textContent?.trim() === '' && el.children.length === 0;
+                        if (el.tagName === 'BR' || isEmptyText) {
+                            const next = el.nextElementSibling;
+                            el.remove();
+                            el = next;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    let curr = document.body.firstElementChild;
+                    while (curr) {
+                        if (curr instanceof HTMLElement) {
+                            curr.style.setProperty('margin-top', '0', 'important');
+                            curr.style.setProperty('padding-top', '0', 'important');
+                        }
+                        curr = curr.firstElementChild;
+                    }
+                });
                 const pdfBuffer = await page.pdf({
                     format: "A4",
                     printBackground: true,
                     preferCSSPageSize: true,
-                    margin: {
-                        top: "20mm",
-                        bottom: "20mm",
-                        left: "15mm",
-                        right: "15mm",
-                    },
+                    margin: { top: "0mm", bottom: "0mm", left: "0mm", right: "0mm" },
                 });
                 await browser.close();
                 return {

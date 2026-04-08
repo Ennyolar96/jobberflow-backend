@@ -20,4 +20,5 @@ __exportStar(require("./pdf-generating.service"), exports);
 __exportStar(require("./websocket.service"), exports);
 __exportStar(require("./security.service"), exports);
 __exportStar(require("./cache.service"), exports);
+__exportStar(require("./mailer.service"), exports);
 //# sourceMappingURL=index.js.map

@@ -13,6 +13,7 @@ const app_module_1 = require("./app.module");
 const utils_1 = require("./global/utils");
 const http_1 = require("http");
 const config_1 = require("./config");
+require("./app/searcher/job-scheduler.service");
 dotenv_1.default.config({ quiet: true });
 (0, routing_controllers_1.useContainer)(typedi_1.Container);
 async function bootstrap() {

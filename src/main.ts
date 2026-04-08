@@ -9,6 +9,9 @@ import { logger, runModuleDestroy, runModuleInit } from "./global/utils";
 import { createServer } from "http";
 import { initializeDatabase } from "./config";
 
+// Ensure scheduled/background services are registered (Lifecycle decorators run on import).
+import "@/app/searcher/job-scheduler.service";
+
 dotenv.config({ quiet: true });
 useContainer(Container);
 
