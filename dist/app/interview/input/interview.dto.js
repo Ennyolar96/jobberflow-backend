@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Interview = void 0;
+exports.Interviews = exports.Interview = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class Interview {
 }
 exports.Interview = Interview;
@@ -49,4 +50,30 @@ __decorate([
     (0, class_validator_1.IsIn)(["confident", "hunble", "assertive"]),
     __metadata("design:type", String)
 ], Interview.prototype, "tone", void 0);
+class Interviews {
+    constructor() {
+        this.page = 1;
+        this.limit = 10;
+    }
+}
+exports.Interviews = Interviews;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], Interviews.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? parseInt(value, 10) : value),
+    __metadata("design:type", Number)
+], Interviews.prototype, "page", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
+    (0, class_transformer_1.Transform)(({ value }) => typeof value === "string" ? parseInt(value, 10) : value),
+    __metadata("design:type", Number)
+], Interviews.prototype, "limit", void 0);
 //# sourceMappingURL=interview.dto.js.map

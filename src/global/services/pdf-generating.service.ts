@@ -45,9 +45,8 @@ export class PdfService {
 
       const page = await browser.newPage();
 
+      // @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
       const enhancedCSS = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
       @page {
         size: A4;
         margin: 20mm 5mm;
@@ -155,8 +154,9 @@ export class PdfService {
         // 1. Remove empty elements like <p><br></p> or standalone <br> at the very top
         let el = document.body.firstElementChild;
         while (el) {
-          const isEmptyText = el.textContent?.trim() === '' && el.children.length === 0;
-          if (el.tagName === 'BR' || isEmptyText) {
+          const isEmptyText =
+            el.textContent?.trim() === "" && el.children.length === 0;
+          if (el.tagName === "BR" || isEmptyText) {
             const next = el.nextElementSibling;
             el.remove();
             el = next;
@@ -169,8 +169,8 @@ export class PdfService {
         let curr = document.body.firstElementChild;
         while (curr) {
           if (curr instanceof HTMLElement) {
-            curr.style.setProperty('margin-top', '0', 'important');
-            curr.style.setProperty('padding-top', '0', 'important');
+            curr.style.setProperty("margin-top", "0", "important");
+            curr.style.setProperty("padding-top", "0", "important");
           }
           curr = curr.firstElementChild;
         }

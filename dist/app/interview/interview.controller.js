@@ -16,7 +16,7 @@ exports.InterviewController = void 0;
 const common_1 = require("../../global/common");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
-const interview_dto_1 = require("./input/interview.dto");
+const input_1 = require("./input");
 const interview_service_1 = require("./interview.service");
 let InterviewController = class InterviewController {
     constructor(interviewService) {
@@ -40,13 +40,17 @@ let InterviewController = class InterviewController {
         await this.interviewService.clearHistory(userId);
         return { success: true, message: "History cleared" };
     }
+    async interviews(data) {
+        const response = await this.interviewService.interviews(data);
+        return { response };
+    }
 };
 exports.InterviewController = InterviewController;
 __decorate([
     (0, routing_controllers_1.Post)("interview"),
     __param(0, (0, routing_controllers_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [interview_dto_1.Interview]),
+    __metadata("design:paramtypes", [input_1.Interview]),
     __metadata("design:returntype", Promise)
 ], InterviewController.prototype, "interview", null);
 __decorate([
@@ -55,7 +59,7 @@ __decorate([
     __param(0, (0, routing_controllers_1.Body)()),
     __param(1, (0, routing_controllers_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [interview_dto_1.Interview, Object]),
+    __metadata("design:paramtypes", [input_1.Interview, Object]),
     __metadata("design:returntype", Promise)
 ], InterviewController.prototype, "transcript", null);
 __decorate([
@@ -65,6 +69,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], InterviewController.prototype, "clearHistory", null);
+__decorate([
+    (0, routing_controllers_1.Get)("interviews"),
+    __param(0, (0, routing_controllers_1.QueryParams)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [input_1.Interviews]),
+    __metadata("design:returntype", Promise)
+], InterviewController.prototype, "interviews", null);
 exports.InterviewController = InterviewController = __decorate([
     (0, typedi_1.Service)(),
     (0, routing_controllers_1.Controller)("/"),

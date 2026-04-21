@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { Interview } from "./input/interview.dto";
+import { Interview, Interviews } from "./input";
 import { InterviewService } from "./interview.service";
 export declare class InterviewController {
     private readonly interviewService;
@@ -14,5 +14,10 @@ export declare class InterviewController {
     clearHistory(userId: string): Promise<{
         success: boolean;
         message: string;
+    }>;
+    interviews(data: Interviews): Promise<{
+        response: {
+            session: import("./entities").InterviewSession[];
+        };
     }>;
 }

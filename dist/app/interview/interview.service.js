@@ -15,6 +15,7 @@ const services_1 = require("../../global/services");
 const nanoid_1 = require("nanoid");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
+const typeorm_1 = require("typeorm");
 const key_service_1 = require("../keys/key.service");
 const entities_1 = require("./entities");
 const input_1 = require("./input");
@@ -144,6 +145,23 @@ let InterviewService = class InterviewService {
             throw new routing_controllers_1.BadRequestError(lastError || "Failed to generate response");
         }
         catch (error) {
+            throw error;
+        }
+    }
+    async interviews(payload) {
+        try {
+            const session = await this.sessionRepository.find({
+                where: { userId: payload.userId },
+                order: {
+                    createdAt: "DESC",
+                },
+            });
+            return { session: session.reverse() };
+        }
+        catch (error) {
+            if (error instanceof typeorm_1.TypeORMError) {
+                throw new routing_controllers_1.BadRequestError("Failed to fetch interviews");
+            }
             throw error;
         }
     }

@@ -4,13 +4,15 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
+  QueryParams,
   Req,
   UseBefore,
 } from "routing-controllers";
 import { Service } from "typedi";
-import { Interview } from "./input/interview.dto";
+import { Interview, Interviews } from "./input";
 import { InterviewService } from "./interview.service";
 
 @Service()
@@ -41,5 +43,11 @@ export class InterviewController {
     if (!userId) return;
     await this.interviewService.clearHistory(userId);
     return { success: true, message: "History cleared" };
+  }
+
+  @Get("interviews")
+  public async interviews(@QueryParams() data: Interviews) {
+    const response = await this.interviewService.interviews(data);
+    return { response };
   }
 }

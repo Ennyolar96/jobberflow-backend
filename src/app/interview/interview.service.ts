@@ -4,7 +4,7 @@ import { Genkit } from "genkit";
 import { nanoid } from "nanoid";
 import { BadRequestError } from "routing-controllers";
 import { Service } from "typedi";
-import { Repository } from "typeorm";
+import { Repository, TypeORMError } from "typeorm";
 import { KeyService } from "../keys/key.service";
 import { InterviewSession, InterviewTurn } from "./entities";
 import {
@@ -14,6 +14,7 @@ import {
   assistanceOutputSchema,
   assistancePrompt,
   interviewPrompt,
+  interviews,
 } from "./input";
 
 @Service()
@@ -151,6 +152,24 @@ export class InterviewService {
 
       throw new BadRequestError(lastError || "Failed to generate response");
     } catch (error) {
+      throw error;
+    }
+  }
+
+  public async interviews(payload: interviews) {
+    try {
+      const session = await this.sessionRepository.find({
+        where: { userId: payload.userId },
+        order: {
+          createdAt: "DESC",
+        },
+      });
+
+      return { session: session.reverse() };
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        throw new BadRequestError("Failed to fetch interviews");
+      }
       throw error;
     }
   }

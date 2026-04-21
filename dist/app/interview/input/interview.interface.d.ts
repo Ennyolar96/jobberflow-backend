@@ -7,3 +7,8 @@ export interface InterviewInterface {
     company: string;
     tone: "confident" | "hunble" | "assertive";
 }
+export interface interviews {
+    userId: string;
+    page?: number;
+    limit?: number;
+}
