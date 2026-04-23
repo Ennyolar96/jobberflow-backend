@@ -34,6 +34,9 @@ let InterviewController = class InterviewController {
         }
         return { success: true, message: "Transcription started" };
     }
+    async assistance(data) {
+        return this.interviewService.assistance(data);
+    }
     async clearHistory(userId) {
         if (!userId)
             return;
@@ -62,6 +65,13 @@ __decorate([
     __metadata("design:paramtypes", [input_1.Interview, Object]),
     __metadata("design:returntype", Promise)
 ], InterviewController.prototype, "transcript", null);
+__decorate([
+    (0, routing_controllers_1.Post)("assistance/resend"),
+    __param(0, (0, routing_controllers_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [input_1.Interview]),
+    __metadata("design:returntype", Promise)
+], InterviewController.prototype, "assistance", null);
 __decorate([
     (0, routing_controllers_1.Delete)("clear-history/:userid"),
     __param(0, (0, routing_controllers_1.Param)("userid")),

@@ -38,6 +38,11 @@ export class InterviewController {
     return { success: true, message: "Transcription started" };
   }
 
+  @Post("assistance/resend")
+  public async assistance(@Body() data: Interview) {
+    return this.interviewService.assistance(data);
+  }
+
   @Delete("clear-history/:userid")
   public async clearHistory(@Param("userid") userId: string) {
     if (!userId) return;

@@ -11,6 +11,7 @@ export declare class InterviewController {
         success: boolean;
         message: string;
     }>;
+    assistance(data: Interview): Promise<string>;
     clearHistory(userId: string): Promise<{
         success: boolean;
         message: string;
