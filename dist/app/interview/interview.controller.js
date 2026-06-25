@@ -13,7 +13,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InterviewController = void 0;
-const common_1 = require("@/global/common");
+const common_1 = require("../../global/common");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const input_1 = require("./input");

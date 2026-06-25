@@ -10,12 +10,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeyService = void 0;
-const services_1 = require("@/global/services");
+const services_1 = require("../../global/services");
 const typedi_1 = require("typedi");
 const typeorm_1 = require("typeorm");
 const routing_controllers_1 = require("routing-controllers");
 const entities_1 = require("./entities");
-const config_1 = require("@/config");
+const config_1 = require("../../config");
 let KeyService = class KeyService {
     constructor(securityService, cacheService) {
         this.securityService = securityService;

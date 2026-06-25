@@ -1,4 +1,4 @@
-import { IBaseEntity } from "@/global/common";
+import { IBaseEntity } from "../../../global/common";
 export interface IKeys extends IBaseEntity {
     userId: string;
     openai: string | null;

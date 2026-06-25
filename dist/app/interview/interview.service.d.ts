@@ -1,4 +1,4 @@
-import { OpenAIService, WebSocketService } from "@/global/services";
+import { OpenAIService, WebSocketService } from "../../global/services";
 import { KeyService } from "../keys/key.service";
 import { InterviewSession } from "./entities";
 import { assistanceInput, interviews } from "./input";

@@ -1,4 +1,4 @@
-import { CacheService, SecurityService } from "@/global/services";
+import { CacheService, SecurityService } from "../../global/services";
 import { IKeyResponse, IKeysCreate } from "./input";
 import { Keys } from "./entities";
 export declare class KeyService {
