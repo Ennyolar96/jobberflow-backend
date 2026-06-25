@@ -1,6 +1,6 @@
 import { CacheService, SecurityService } from "@/global/services";
 import { Service } from "typedi";
-import { IKeysCreate } from "./input";
+import { IKeyResponse, IKeysCreate } from "./input";
 import { Repository, TypeORMError } from "typeorm";
 import { BadRequestError, InternalServerError } from "routing-controllers";
 import { Keys } from "./entities";
@@ -38,7 +38,11 @@ export class KeyService {
         }
       }
 
-      const aiProviders: (keyof IKeysCreate)[] = ["openai", "gemini"];
+      const aiProviders: (keyof IKeysCreate)[] = [
+        "openai",
+        "gemini",
+        "deepgram",
+      ];
 
       const encryptionTasks = aiProviders.map(async (field) => {
         const value = payload[field];
@@ -72,38 +76,36 @@ export class KeyService {
     }
   }
 
-  async getKeys(
-    userId: string,
-  ): Promise<{ openai: string | null; gemini: string | null }> {
+  async getKeys(userId: string): Promise<IKeyResponse> {
     try {
       const cacheKey = this.cacheService.generateKey("keys", { userId });
-      const cachedKeys = this.cacheService.getQuery<{
-        openai: string | null;
-        gemini: string | null;
-      }>(cacheKey);
+      const cachedKeys = this.cacheService.getQuery<IKeyResponse>(cacheKey);
       if (cachedKeys) return cachedKeys;
 
       const key = await this.keyRepository.findOne({
         where: { userId },
       });
-      if (!key) return { openai: null, gemini: null };
+      if (!key) return null;
 
       const password = await this.securityService.decrypt(
         key.password,
         ENCRYPTION_KEY,
       );
 
-      const [openai, gemini] = await Promise.all([
+      const [openai, gemini, deepgram] = await Promise.all([
         key.openai
           ? this.securityService.decrypt(key.openai, password)
           : Promise.resolve(null),
         key.gemini
           ? this.securityService.decrypt(key.gemini, password)
           : Promise.resolve(null),
+        key.deepgram
+          ? this.securityService.decrypt(key.deepgram, password)
+          : Promise.resolve(null),
       ]);
 
-      this.cacheService.setQuery(cacheKey, { openai, gemini });
-      return { openai, gemini };
+      this.cacheService.setQuery(cacheKey, { openai, gemini, deepgram });
+      return { openai, gemini, deepgram };
     } catch (error) {
       if (error instanceof TypeORMError) {
         throw new InternalServerError(

@@ -10,8 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResumeService = void 0;
-const config_1 = require("../../config");
-const services_1 = require("../../global/services");
+const config_1 = require("@/config");
+const services_1 = require("@/global/services");
 const nanoid_1 = require("nanoid");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");

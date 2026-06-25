@@ -10,14 +10,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InterviewService = void 0;
-const config_1 = require("../../config");
-const services_1 = require("../../global/services");
+const config_1 = require("@/config");
+const services_1 = require("@/global/services");
 const nanoid_1 = require("nanoid");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const typeorm_1 = require("typeorm");
 const key_service_1 = require("../keys/key.service");
 const entities_1 = require("./entities");
+const sdk_1 = require("@deepgram/sdk");
 const input_1 = require("./input");
 let InterviewService = class InterviewService {
     constructor(openAIService, wsService, keyService) {
@@ -40,6 +41,27 @@ let InterviewService = class InterviewService {
                 const provider = (0, config_1.createProvider)(gemini, "gemini");
                 const prompt = provider.definePrompt(isInterview ? input_1.interviewPrompt : input_1.assistancePrompt);
                 return this.executeFlow(input, provider, prompt, isInterview ? "interview-with-gemini" : "assistance-with-gemini");
+            },
+        };
+        this.transcribeProviders = {
+            deepgram: async (buffer, userId) => {
+                const { deepgram } = await this.keyService.getKeys(userId);
+                console.log(deepgram);
+                const client = new sdk_1.DeepgramClient({ apiKey: deepgram });
+                const audioBuffer = new Uint8Array(buffer);
+                const res = await client.listen.v1.media.transcribeFile(audioBuffer, {
+                    model: "nova-3",
+                });
+                if ("results" in res) {
+                    return res.results.channels[0].alternatives[0].transcript;
+                }
+                throw new routing_controllers_1.BadRequestError("Deepgram transcription failed: no results");
+            },
+            openai: async (buffer, userId) => {
+                const { openai } = await this.keyService.getKeys(userId);
+                if (!openai)
+                    throw new routing_controllers_1.BadRequestError("OpenAI API key is required");
+                return this.openAIService.transcribeAudio(buffer, openai);
             },
         };
         this.sessionRepository = config_1.AppDataSource.getRepository(entities_1.InterviewSession);
@@ -179,10 +201,7 @@ let InterviewService = class InterviewService {
                 text: "Converting audio to text...",
                 message: "Converting audio to text...",
             });
-            const { openai } = await this.keyService.getKeys(payload.userId);
-            if (!openai)
-                throw new routing_controllers_1.BadRequestError("OpenAI API key is required");
-            const text = await this.openAIService.transcribeAudio(file.buffer, openai);
+            const text = await this.transcribeWithFallback(file.buffer, payload.userId);
             this.wsService.emitToRoom(room, eventName, {
                 status: "transcribed",
                 sender: "user",
@@ -230,6 +249,31 @@ let InterviewService = class InterviewService {
             }
         });
         return flow(input);
+    }
+    async transcribeWithFallback(buffer, userId) {
+        const providers = [
+            {
+                name: "Deepgram",
+                fn: () => this.transcribeProviders.deepgram(buffer, userId),
+            },
+            {
+                name: "OpenAI Whisper",
+                fn: () => this.transcribeProviders.openai(buffer, userId),
+            },
+        ];
+        let lastError = null;
+        for (const provider of providers) {
+            try {
+                const text = await provider.fn();
+                console.log(`Transcription completed with ${provider.name}`);
+                return text;
+            }
+            catch (error) {
+                console.log(`Transcription failed with ${provider.name}:`, error);
+                lastError = error;
+            }
+        }
+        throw new routing_controllers_1.BadRequestError(lastError?.message || "All transcription providers failed");
     }
     provideSwitch(payload, isInterview = false) {
         const { provider, ...rest } = payload;

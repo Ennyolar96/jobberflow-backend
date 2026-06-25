@@ -10,12 +10,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeyService = void 0;
-const services_1 = require("../../global/services");
+const services_1 = require("@/global/services");
 const typedi_1 = require("typedi");
 const typeorm_1 = require("typeorm");
 const routing_controllers_1 = require("routing-controllers");
 const entities_1 = require("./entities");
-const config_1 = require("../../config");
+const config_1 = require("@/config");
 let KeyService = class KeyService {
     constructor(securityService, cacheService) {
         this.securityService = securityService;
@@ -37,7 +37,11 @@ let KeyService = class KeyService {
                     throw new routing_controllers_1.BadRequestError("incorrect credientials");
                 }
             }
-            const aiProviders = ["openai", "gemini"];
+            const aiProviders = [
+                "openai",
+                "gemini",
+                "deepgram",
+            ];
             const encryptionTasks = aiProviders.map(async (field) => {
                 const value = payload[field];
                 if (value && typeof value === "string") {
@@ -72,18 +76,21 @@ let KeyService = class KeyService {
                 where: { userId },
             });
             if (!key)
-                return { openai: null, gemini: null };
+                return null;
             const password = await this.securityService.decrypt(key.password, config_1.ENCRYPTION_KEY);
-            const [openai, gemini] = await Promise.all([
+            const [openai, gemini, deepgram] = await Promise.all([
                 key.openai
                     ? this.securityService.decrypt(key.openai, password)
                     : Promise.resolve(null),
                 key.gemini
                     ? this.securityService.decrypt(key.gemini, password)
                     : Promise.resolve(null),
+                key.deepgram
+                    ? this.securityService.decrypt(key.deepgram, password)
+                    : Promise.resolve(null),
             ]);
-            this.cacheService.setQuery(cacheKey, { openai, gemini });
-            return { openai, gemini };
+            this.cacheService.setQuery(cacheKey, { openai, gemini, deepgram });
+            return { openai, gemini, deepgram };
         }
         catch (error) {
             if (error instanceof typeorm_1.TypeORMError) {

@@ -31,6 +31,11 @@ __decorate([
 ], CreateKey.prototype, "gemini", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateKey.prototype, "deepgram", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateKey.prototype, "password", void 0);

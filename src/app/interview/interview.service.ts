@@ -7,6 +7,8 @@ import { Service } from "typedi";
 import { Repository, TypeORMError } from "typeorm";
 import { KeyService } from "../keys/key.service";
 import { InterviewSession, InterviewTurn } from "./entities";
+import { createReadStream } from "fs";
+import { DeepgramClient } from "@deepgram/sdk";
 import {
   assistanceInput,
   assistanceInputSchema,
@@ -195,12 +197,10 @@ export class InterviewService {
         message: "Converting audio to text...",
       });
 
-      // 2. Transcribe using OpenAIService
-      const { openai } = await this.keyService.getKeys(payload.userId);
-      if (!openai) throw new BadRequestError("OpenAI API key is required");
-      const text = await this.openAIService.transcribeAudio(
+      // 2. Transcribe with fallback chain
+      const text = await this.transcribeWithFallback(
         file.buffer,
-        openai,
+        payload.userId,
       );
 
       this.wsService.emitToRoom(room, eventName, {
@@ -302,6 +302,60 @@ export class InterviewService {
     );
 
     return flow(input);
+  }
+
+  // ─── Speech-to-text providers with fallback 863f8b85859cd54a67d6ed43e6976db8db7bdfbf  ──────────────────────────────
+  private transcribeProviders = {
+    deepgram: async (buffer: Buffer, userId: string) => {
+      const { deepgram } = await this.keyService.getKeys(userId);
+      console.log(deepgram);
+
+      const client = new DeepgramClient({ apiKey: deepgram });
+      const audioBuffer = new Uint8Array(buffer);
+      const res = await client.listen.v1.media.transcribeFile(audioBuffer, {
+        model: "nova-3",
+      });
+      if ("results" in res) {
+        return res.results.channels[0].alternatives[0].transcript;
+      }
+      throw new BadRequestError("Deepgram transcription failed: no results");
+    },
+    openai: async (buffer: Buffer, userId: string) => {
+      const { openai } = await this.keyService.getKeys(userId);
+      if (!openai) throw new BadRequestError("OpenAI API key is required");
+      return this.openAIService.transcribeAudio(buffer, openai);
+    },
+  };
+
+  private async transcribeWithFallback(
+    buffer: Buffer,
+    userId: string,
+  ): Promise<string> {
+    const providers: { name: string; fn: () => Promise<string> }[] = [
+      {
+        name: "Deepgram",
+        fn: () => this.transcribeProviders.deepgram(buffer, userId),
+      },
+      {
+        name: "OpenAI Whisper",
+        fn: () => this.transcribeProviders.openai(buffer, userId),
+      },
+    ];
+
+    let lastError: any = null;
+    for (const provider of providers) {
+      try {
+        const text = await provider.fn();
+        console.log(`Transcription completed with ${provider.name}`);
+        return text;
+      } catch (error) {
+        console.log(`Transcription failed with ${provider.name}:`, error);
+        lastError = error;
+      }
+    }
+    throw new BadRequestError(
+      lastError?.message || "All transcription providers failed",
+    );
   }
 
   private provideSwitch(payload: assistanceInput, isInterview = false) {

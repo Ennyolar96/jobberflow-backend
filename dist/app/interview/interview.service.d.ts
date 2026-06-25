@@ -1,4 +1,4 @@
-import { OpenAIService, WebSocketService } from "../../global/services";
+import { OpenAIService, WebSocketService } from "@/global/services";
 import { KeyService } from "../keys/key.service";
 import { InterviewSession } from "./entities";
 import { assistanceInput, interviews } from "./input";
@@ -20,5 +20,7 @@ export declare class InterviewService {
     transcript(payload: assistanceInput, file: Express.Multer.File): Promise<void>;
     private provider;
     private executeFlow;
+    private transcribeProviders;
+    private transcribeWithFallback;
     private provideSwitch;
 }

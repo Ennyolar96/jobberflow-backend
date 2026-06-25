@@ -13,6 +13,9 @@ export class Keys extends BaseEntity implements IKeys {
   @Column({ nullable: true })
   gemini: string | null;
 
+  @Column({ nullable: true })
+  deepgram: string | null;
+
   @Column()
   password: string;
 }

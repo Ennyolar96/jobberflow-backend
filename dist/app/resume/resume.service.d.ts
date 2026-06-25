@@ -1,4 +1,4 @@
-import { DocumentService, PdfService } from "../../global/services";
+import { DocumentService, PdfService } from "@/global/services";
 import { ResumeInput } from "./input";
 import { KeyService } from "../keys/key.service";
 export declare class ResumeService {

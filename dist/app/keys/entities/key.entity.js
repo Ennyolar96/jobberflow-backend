@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Keys = void 0;
-const common_1 = require("../../../global/common");
+const common_1 = require("@/global/common");
 const typeorm_1 = require("typeorm");
 let Keys = class Keys extends common_1.BaseEntity {
 };
@@ -27,6 +27,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Keys.prototype, "gemini", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Keys.prototype, "deepgram", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

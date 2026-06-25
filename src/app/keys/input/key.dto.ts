@@ -15,6 +15,10 @@ export class CreateKey implements IKeysCreate {
   gemini: string;
 
   @IsString()
+  @IsOptional()
+  deepgram: string;
+
+  @IsString()
   @IsNotEmpty()
   password: string;
 }

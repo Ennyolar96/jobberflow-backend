@@ -1,5 +1,5 @@
-import { CacheService, SecurityService } from "../../global/services";
-import { IKeysCreate } from "./input";
+import { CacheService, SecurityService } from "@/global/services";
+import { IKeyResponse, IKeysCreate } from "./input";
 import { Keys } from "./entities";
 export declare class KeyService {
     private readonly securityService;
@@ -7,9 +7,6 @@ export declare class KeyService {
     private readonly keyRepository;
     constructor(securityService: SecurityService, cacheService: CacheService);
     createkey(payload: IKeysCreate): Promise<Keys>;
-    getKeys(userId: string): Promise<{
-        openai: string | null;
-        gemini: string | null;
-    }>;
+    getKeys(userId: string): Promise<IKeyResponse>;
     verifyPassword(userId: string, password: string): Promise<boolean>;
 }

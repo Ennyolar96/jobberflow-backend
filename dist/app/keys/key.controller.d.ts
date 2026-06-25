@@ -4,9 +4,6 @@ export declare class KeyController {
     private readonly keyService;
     constructor(keyService: KeyService);
     createKey(input: CreateKey): Promise<import("./entities").Keys>;
-    getKeys(userId: string): Promise<{
-        openai: string | null;
-        gemini: string | null;
-    }>;
+    getKeys(userId: string): Promise<import("./input").IKeyResponse>;
     verifyPassword(input: VerifyPassword): Promise<boolean>;
 }
