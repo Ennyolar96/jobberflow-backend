@@ -39,7 +39,6 @@ const initializeDatabase = async (maxRetries = 5, delay = 5000) => {
             if (!exports.AppDataSource.isInitialized) {
                 await exports.AppDataSource.initialize();
             }
-            console.log("Database connection established");
             return exports.AppDataSource;
         }
         catch (error) {
@@ -48,7 +47,6 @@ const initializeDatabase = async (maxRetries = 5, delay = 5000) => {
                 console.error(`All ${maxRetries} connection attempts failed`);
                 throw error;
             }
-            console.log(`Retrying in ${delay}ms... (Attempt ${attempt + 1}/${maxRetries})`);
             await new Promise((resolve) => setTimeout(resolve, delay));
         }
     }

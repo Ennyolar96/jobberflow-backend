@@ -48,14 +48,11 @@ export class ResumeService {
 
       for (const provider of providers) {
         try {
-          console.log(`Running flow with ${provider.name}`);
           result = await provider.fn();
           if (result && result.response) {
-            console.log(`Flow completed with ${provider.name}`);
             break;
           }
         } catch (error) {
-          console.log(`Error in ${provider.name}:`, error);
           lastError = error;
         }
       }
@@ -69,7 +66,6 @@ export class ResumeService {
 
       return result.response;
     } catch (error) {
-      console.log(`Error in CV Rewrite:`, error);
       throw error;
     }
   };
@@ -129,7 +125,6 @@ export class ResumeService {
           const { output } = await promptFn(flowInput);
           return { response: output?.response || "" };
         } catch (error) {
-          console.log(`Error in ${flowName}:`, error);
           throw error;
         }
       },

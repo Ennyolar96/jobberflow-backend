@@ -47,16 +47,13 @@ async function bootstrap() {
             utils_1.logger.info(`=================================`);
         });
         const gracefulShutdown = async () => {
-            console.log("Shutting down gracefully...");
             await (0, utils_1.runModuleDestroy)();
             process.exit(0);
         };
         process.on("SIGINT", gracefulShutdown);
         process.on("SIGTERM", gracefulShutdown);
     }
-    catch (error) {
-        console.log("Error initializing app", error);
-    }
+    catch (error) { }
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

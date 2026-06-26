@@ -1,6 +1,6 @@
 import { AppDataSource, createProvider } from "@/config";
 import { OpenAIService, userRoom, WebSocketService } from "@/global/services";
-import { Genkit } from "genkit";
+import { Genkit, GenkitError } from "genkit";
 import { nanoid } from "nanoid";
 import { BadRequestError } from "routing-controllers";
 import { Service } from "typedi";
@@ -91,14 +91,11 @@ export class InterviewService {
 
       for (const provider of providers) {
         try {
-          console.log(`Running flow with ${provider.name}`);
           result = await provider.fn();
           if (result && result.response) {
-            console.log(`Flow completed with ${provider.name}`);
             break;
           }
         } catch (error) {
-          console.log(`Error in ${provider.name}:`, error);
           lastError = error;
         }
       }
@@ -108,7 +105,6 @@ export class InterviewService {
 
       return result.response;
     } catch (error) {
-      console.log(`Error in assistance:`, error);
       throw error;
     }
   }
@@ -154,6 +150,9 @@ export class InterviewService {
 
       throw new BadRequestError(lastError || "Failed to generate response");
     } catch (error) {
+      if (error instanceof GenkitError) {
+        throw new BadRequestError(error.message);
+      }
       throw error;
     }
   }
@@ -230,12 +229,14 @@ export class InterviewService {
         message: "assistance completed successfully.",
       });
     } catch (error: any) {
-      this.wsService.emitToRoom(room, eventName, {
-        status: "error",
-        sender: "ai",
-        text: error.message || "An error occurred",
-        message: error.message || "An error occurred",
-      });
+      if (error instanceof GenkitError) {
+        this.wsService.emitToRoom(room, eventName, {
+          status: "error",
+          sender: "ai",
+          text: error.message || "An error occurred",
+          message: error.message || "An error occurred",
+        });
+      }
       throw error;
     }
   }
@@ -295,7 +296,6 @@ export class InterviewService {
           const { output } = await promptFn(flowInput);
           return { response: output?.response || "" };
         } catch (error) {
-          console.log(`Error in ${flowName}:`, error);
           throw error;
         }
       },
@@ -304,12 +304,10 @@ export class InterviewService {
     return flow(input);
   }
 
-  // ─── Speech-to-text providers with fallback 863f8b85859cd54a67d6ed43e6976db8db7bdfbf  ──────────────────────────────
+  // ─── Speech-to-text providers with fallback  ──────────────────────────────
   private transcribeProviders = {
     deepgram: async (buffer: Buffer, userId: string) => {
       const { deepgram } = await this.keyService.getKeys(userId);
-      console.log(deepgram);
-
       const client = new DeepgramClient({ apiKey: deepgram });
       const audioBuffer = new Uint8Array(buffer);
       const res = await client.listen.v1.media.transcribeFile(audioBuffer, {
@@ -346,10 +344,8 @@ export class InterviewService {
     for (const provider of providers) {
       try {
         const text = await provider.fn();
-        console.log(`Transcription completed with ${provider.name}`);
         return text;
       } catch (error) {
-        console.log(`Transcription failed with ${provider.name}:`, error);
         lastError = error;
       }
     }

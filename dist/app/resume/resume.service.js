@@ -45,15 +45,12 @@ let ResumeService = class ResumeService {
                 });
                 for (const provider of providers) {
                     try {
-                        console.log(`Running flow with ${provider.name}`);
                         result = await provider.fn();
                         if (result && result.response) {
-                            console.log(`Flow completed with ${provider.name}`);
                             break;
                         }
                     }
                     catch (error) {
-                        console.log(`Error in ${provider.name}:`, error);
                         lastError = error;
                     }
                 }
@@ -65,7 +62,6 @@ let ResumeService = class ResumeService {
                 return result.response;
             }
             catch (error) {
-                console.log(`Error in CV Rewrite:`, error);
                 throw error;
             }
         };
@@ -120,7 +116,6 @@ let ResumeService = class ResumeService {
                 return { response: output?.response || "" };
             }
             catch (error) {
-                console.log(`Error in ${flowName}:`, error);
                 throw error;
             }
         });

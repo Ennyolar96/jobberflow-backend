@@ -37,7 +37,6 @@ export async function runModuleInit() {
       const instance = Container.get(ServiceClass);
 
       if (typeof (instance as any).onModuleInit === "function") {
-        // console.log(`Initializing ${ServiceClass.name}...`);
         await (instance as any).onModuleInit();
         console.log(`✓ ${ServiceClass.name} initialized`);
       }
@@ -59,7 +58,6 @@ export async function runModuleDestroy() {
       const instance = Container.get(ServiceClass);
 
       if (typeof (instance as any).onModuleDestroy === "function") {
-        // console.log(`Destroying ${ServiceClass.name}...`);
         await (instance as any).onModuleDestroy();
         console.log(`✓ ${ServiceClass.name} destroyed`);
       }

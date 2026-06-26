@@ -43,7 +43,6 @@ export const initializeDatabase = async (
       if (!AppDataSource.isInitialized) {
         await AppDataSource.initialize();
       }
-      console.log("Database connection established");
 
       return AppDataSource;
     } catch (error) {
@@ -53,10 +52,6 @@ export const initializeDatabase = async (
         console.error(`All ${maxRetries} connection attempts failed`);
         throw error;
       }
-
-      console.log(
-        `Retrying in ${delay}ms... (Attempt ${attempt + 1}/${maxRetries})`,
-      );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

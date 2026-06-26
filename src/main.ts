@@ -54,16 +54,13 @@ async function bootstrap() {
     });
 
     const gracefulShutdown = async () => {
-      console.log("Shutting down gracefully...");
       await runModuleDestroy();
       process.exit(0);
     };
 
     process.on("SIGINT", gracefulShutdown);
     process.on("SIGTERM", gracefulShutdown);
-  } catch (error) {
-    console.log("Error initializing app", error);
-  }
+  } catch (error) {}
 }
 
 bootstrap();

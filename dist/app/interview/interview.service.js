@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InterviewService = void 0;
 const config_1 = require("../../config");
 const services_1 = require("../../global/services");
+const genkit_1 = require("genkit");
 const nanoid_1 = require("nanoid");
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
@@ -46,7 +47,6 @@ let InterviewService = class InterviewService {
         this.transcribeProviders = {
             deepgram: async (buffer, userId) => {
                 const { deepgram } = await this.keyService.getKeys(userId);
-                console.log(deepgram);
                 const client = new sdk_1.DeepgramClient({ apiKey: deepgram });
                 const audioBuffer = new Uint8Array(buffer);
                 const res = await client.listen.v1.media.transcribeFile(audioBuffer, {
@@ -110,15 +110,12 @@ let InterviewService = class InterviewService {
             const providers = this.provideSwitch(payload);
             for (const provider of providers) {
                 try {
-                    console.log(`Running flow with ${provider.name}`);
                     result = await provider.fn();
                     if (result && result.response) {
-                        console.log(`Flow completed with ${provider.name}`);
                         break;
                     }
                 }
                 catch (error) {
-                    console.log(`Error in ${provider.name}:`, error);
                     lastError = error;
                 }
             }
@@ -128,7 +125,6 @@ let InterviewService = class InterviewService {
             return result.response;
         }
         catch (error) {
-            console.log(`Error in assistance:`, error);
             throw error;
         }
     }
@@ -167,6 +163,9 @@ let InterviewService = class InterviewService {
             throw new routing_controllers_1.BadRequestError(lastError || "Failed to generate response");
         }
         catch (error) {
+            if (error instanceof genkit_1.GenkitError) {
+                throw new routing_controllers_1.BadRequestError(error.message);
+            }
             throw error;
         }
     }
@@ -224,12 +223,14 @@ let InterviewService = class InterviewService {
             });
         }
         catch (error) {
-            this.wsService.emitToRoom(room, eventName, {
-                status: "error",
-                sender: "ai",
-                text: error.message || "An error occurred",
-                message: error.message || "An error occurred",
-            });
+            if (error instanceof genkit_1.GenkitError) {
+                this.wsService.emitToRoom(room, eventName, {
+                    status: "error",
+                    sender: "ai",
+                    text: error.message || "An error occurred",
+                    message: error.message || "An error occurred",
+                });
+            }
             throw error;
         }
     }
@@ -244,7 +245,6 @@ let InterviewService = class InterviewService {
                 return { response: output?.response || "" };
             }
             catch (error) {
-                console.log(`Error in ${flowName}:`, error);
                 throw error;
             }
         });
@@ -265,11 +265,9 @@ let InterviewService = class InterviewService {
         for (const provider of providers) {
             try {
                 const text = await provider.fn();
-                console.log(`Transcription completed with ${provider.name}`);
                 return text;
             }
             catch (error) {
-                console.log(`Transcription failed with ${provider.name}:`, error);
                 lastError = error;
             }
         }
